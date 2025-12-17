@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rueda de Tickets</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: linear-gradient(to right, #ff9a9e, #fad0c4);
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    margin-top: 30px;
+    font-size: 2em;
+  }
+  #wheel-container {
+    margin: 40px auto;
+    position: relative;
+    width: 300px;
+    height: 300px;
+  }
+  #wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 8px solid #fff;
+    background: conic-gradient(
+      #ff6384 0deg 60deg,
+      #36a2eb 60deg 120deg,
+      #ffcd56 120deg 180deg,
+      #4bc0c0 180deg 240deg,
+      #9966ff 240deg 300deg,
+      #ff9f40 300deg 360deg
+    );
+    transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+  #pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2em;
+    color: #fff;
+    text-shadow: 1px 1px #000;
+  }
+  button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    background-color: #36a2eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background-color: #2a7ccf;
+  }
+  #tickets, #prize-pool, #message {
+    font-size: 1.2em;
+    margin-top: 15px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🎡 Gira la rueda y gana tickets</h1>
+
+<div id="wheel-container">
+  <div id="pointer">▲</div>
+  <div id="wheel"></div>
+</div>
+
+<button id="spinBtn">GIRAR</button>
+
+<div id="tickets">Tickets: 0</div>
+<div id="prize-pool">Bote actual: 0,00 €</div>
+<div id="message"></div>
+
+<script>
+  const wheel = document.getElementById('wheel');
+  const spinBtn = document.getElementById('spinBtn');
+  const ticketsEl = document.getElementById('tickets');
+  const prizePoolEl = document.getElementById('prize-pool');
+  const messageEl = document.getElementById('message');
+
+  // Inicializa tickets y bote en LocalStorage
+  let tickets = parseInt(localStorage.getItem('tickets')) || 0;
+  let prizePool = parseFloat(localStorage.getItem('prizePool')) || 0.00;
+  ticketsEl.textContent = `Tickets: ${tickets}`;
+  prizePoolEl.textContent = `Bote actual: ${prizePool.toFixed(2)} €`;
+
+  const segments = [1, 2, 3, 1, 2, 5]; // tickets que da cada segmento
+
+  spinBtn.addEventListener('click', () => {
+    spinBtn.disabled = true;
+    messageEl.textContent = '';
+
+    // Elegir segmento aleatorio
+    const segmentIndex = Math.floor(Math.random() * segments.length);
+    const ticketsWon = segments[segmentIndex];
+
+    // Girar la rueda
+    const spins = 5; // vueltas completas
+    const segmentDegree = 360 / segments.length;
+    const randomOffset = Math.random() * segmentDegree;
+    const rotateDeg = spins * 360 + segmentIndex * segmentDegree + randomOffset;
+
+    wheel.style.transform = `rotate(${rotateDeg}deg)`;
+
+    // Después de girar
+    setTimeout(() => {
+      tickets += ticketsWon;
+      prizePool += ticketsWon * 0.1; // ejemplo: cada ticket = 0,10 € en bote
+      localStorage.setItem('tickets', tickets);
+      localStorage.setItem('prizePool', prizePool.toFixed(2));
+      ticketsEl.textContent = `Tickets: ${tickets}`;
+      prizePoolEl.textContent = `Bote actual: ${prizePool.toFixed(2)} €`;
+      messageEl.textContent = `🎟️ Has ganado ${ticketsWon} tickets!`;
+      spinBtn.disabled = false;
+    }, 4000);
+  });
+</script>
+
+</body>
+</html>
